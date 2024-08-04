@@ -1,0 +1,69 @@
+Bundled license information:
+
+react-is/cjs/react-is.production.min.js:
+  /** @license React v16.13.1
+   * react-is.production.min.js
+   *
+   * Copyright (c) Facebook, Inc. and its affiliates.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE file in the root directory of this source tree.
+   */
+
+react-is/cjs/react-is.production.min.js:
+  /** @license React v17.0.2
+   * react-is.production.min.js
+   *
+   * Copyright (c) Facebook, Inc. and its affiliates.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE file in the root directory of this source tree.
+   */
+
+object-assign/index.js:
+  /*
+  object-assign
+  (c) Sindre Sorhus
+  @license MIT
+  */
+
+scheduler/cjs/scheduler.production.min.js:
+  /** @license React v0.20.2
+   * scheduler.production.min.js
+   *
+   * Copyright (c) Facebook, Inc. and its affiliates.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE file in the root directory of this source tree.
+   */
+
+react-reconciler/cjs/react-reconciler.production.min.js:
+  /** @license React v0.26.2
+   * react-reconciler.production.min.js
+   *
+   * Copyright (c) Facebook, Inc. and its affiliates.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE file in the root directory of this source tree.
+   */
+
+arr-flatten/index.js:
+  /*!
+   * arr-flatten <https://github.com/jonschlinkert/arr-flatten>
+   *
+   * Copyright (c) 2014-2017, Jon Schlinkert.
+   * Released under the MIT License.
+   */
+
+timm/lib/timm.js:
+  /*!
+   * Timm
+   *
+   * Immutability helpers with fast reads and acceptable writes.
+   *
+   * @copyright Guillermo Grau Panea 2016
+   * @license MIT
+   */
+
+queue-microtask/index.js:
+  /*! queue-microtask. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
