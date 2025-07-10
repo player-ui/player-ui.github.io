@@ -68,6 +68,17 @@ timm/lib/timm.js:
 queue-microtask/index.js:
   /*! queue-microtask. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
 
+use-sync-external-store/cjs/use-sync-external-store-shim.production.js:
+  /**
+   * @license React
+   * use-sync-external-store-shim.production.js
+   *
+   * Copyright (c) Meta Platforms, Inc. and affiliates.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE file in the root directory of this source tree.
+   */
+
 typescript/lib/typescript.js:
   /*! *****************************************************************************
   Copyright (c) Microsoft Corporation. All rights reserved.
