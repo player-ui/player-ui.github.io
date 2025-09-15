@@ -47,14 +47,6 @@ react-reconciler/cjs/react-reconciler.production.min.js:
    * LICENSE file in the root directory of this source tree.
    */
 
-arr-flatten/index.js:
-  /*!
-   * arr-flatten <https://github.com/jonschlinkert/arr-flatten>
-   *
-   * Copyright (c) 2014-2017, Jon Schlinkert.
-   * Released under the MIT License.
-   */
-
 timm/lib/timm.js:
   /*!
    * Timm
