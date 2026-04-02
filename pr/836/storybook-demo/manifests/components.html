@@ -1,0 +1,3419 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Components Manifest</title>
+  <style>
+      :root {
+          --bg: #0b0c10;
+          --panel: #121318;
+          --muted: #9aa0a6;
+          --fg: #e8eaed;
+          --ok: #22c55e;
+          --info: #1e88e5;
+          --err: #c62828;
+          --ok-bg: #0c1a13;
+          --info-bg: #0c1624;
+          --err-bg: #1a0e0e;
+          --chip: #1f2330;
+          --border: #2b2f3a;
+          --link: #8ab4f8;
+          --active-ring: 1px; /* 1px active ring for pills and toggles */
+      }
+
+      * {
+          box-sizing: border-box;
+      }
+
+      html,
+      body {
+          margin: 0;
+          background: var(--bg);
+          color: var(--fg);
+          font: 14px/1.5 system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Ubuntu,
+          Cantarell,
+          'Helvetica Neue',
+          Arial,
+          'Noto Sans';
+      }
+
+      .wrap {
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 16px 20px;
+      }
+
+      header {
+          position: sticky;
+          top: 0;
+          backdrop-filter: blur(6px);
+          background: color-mix(in srgb, var(--bg) 84%, transparent);
+          border-bottom: 1px solid var(--border);
+          z-index: 10;
+      }
+
+      h1 {
+          font-size: 20px;
+          margin: 0 0 6px;
+      }
+
+      .summary {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+          align-items: center;
+      }
+
+      /* Top filter pills */
+      .filter-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 12px;
+          border: 1px solid var(--border);
+          border-radius: 999px;
+          background: var(--panel);
+          text-decoration: none;
+          cursor: pointer;
+          user-select: none;
+          color: var(--fg);
+      }
+
+      .filter-pill.ok {
+          color: #b9f6ca;
+          border-color: color-mix(in srgb, var(--ok) 55%, var(--border));
+          background: color-mix(in srgb, var(--ok) 18%, #000);
+      }
+
+      .filter-pill.info {
+          color: #b3d9ff;
+          border-color: color-mix(in srgb, var(--info) 55%, var(--border));
+          background: var(--info-bg);
+      }
+
+      .filter-pill.err {
+          color: #ff9aa0;
+          border-color: color-mix(in srgb, var(--err) 55%, var(--border));
+          background: var(--err-bg);
+      }
+
+      .filter-pill.all {
+          color: #d7dbe0;
+          border-color: var(--border);
+          background: var(--panel);
+      }
+
+      .filter-pill[aria-disabled='true'] {
+          cursor: default;
+          text-decoration: none;
+      }
+
+      .filter-pill:focus,
+      .filter-pill:active {
+          outline: none;
+          box-shadow: none;
+      }
+
+      /* Selected top pill ring via :target */
+      #filter-all:target ~ header .filter-pill[data-k='all'],
+      #filter-errors:target ~ header .filter-pill[data-k='errors'],
+      #filter-infos:target ~ header .filter-pill[data-k='infos'],
+      #filter-story-errors:target ~ header .filter-pill[data-k='story-errors'],
+      #filter-doc-errors:target ~ header .filter-pill[data-k='docs'],
+      #filter-docs:target ~ header .filter-pill[data-k='docs'] {
+          box-shadow: 0 0 0 var(--active-ring) currentColor;
+          border-color: currentColor;
+      }
+
+      /* Hidden targets for filtering */
+      #filter-all,
+      #filter-errors,
+      #filter-infos,
+      #filter-story-errors,
+      #filter-doc-errors,
+      #filter-docs {
+          display: none;
+      }
+
+      main {
+          padding: 36px 0 40px;
+      }
+
+      .grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 18px;
+      }
+
+      /* one card per row */
+
+      .card {
+          border: 1px solid var(--border);
+          background: var(--panel);
+          border-radius: 14px;
+          padding: 14px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+      }
+
+      .head {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+      }
+
+      .title {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+      }
+
+      .title h2 {
+          font-size: 16px;
+          margin: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+      }
+
+      .meta {
+          font-size: 12px;
+          color: var(--muted);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+      }
+
+      .kv {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+      }
+
+      .chip {
+          font-size: 12px;
+          padding: 4px 8px;
+          border-radius: 999px;
+          background: var(--chip);
+          border: 1px solid var(--border);
+      }
+
+      .hint {
+          color: var(--muted);
+          font-size: 12px;
+      }
+
+      .badges {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+      }
+
+      /* Per-card badges: labels become toggles when clickable */
+      .badge {
+          font-size: 12px;
+          padding: 3px 8px;
+          border-radius: 999px;
+          border: 1px solid var(--border);
+          background: var(--chip);
+          color: #d7dbe0;
+      }
+
+      .badge.ok {
+          color: #b9f6ca;
+          border-color: color-mix(in srgb, var(--ok) 55%, var(--border));
+      }
+
+      .badge.info {
+          color: #b3d9ff;
+          border-color: color-mix(in srgb, var(--info) 55%, var(--border));
+      }
+
+      .badge.err {
+          color: #ff9aa0;
+          border-color: color-mix(in srgb, var(--err) 55%, var(--border));
+      }
+
+      .as-toggle {
+          cursor: pointer;
+      }
+
+      /* 1px ring on active toggle */
+      .tg-err:checked + label.as-toggle,
+      .tg-info:checked + label.as-toggle,
+      .tg-stories:checked + label.as-toggle,
+      .tg-docs:checked + label.as-toggle,
+      .tg-content:checked + label.as-toggle,
+      .tg-props:checked + label.as-toggle {
+          box-shadow: 0 0 0 var(--active-ring) currentColor;
+          border-color: currentColor;
+      }
+
+      /* Panels: hidden by default, shown when respective toggle checked */
+      .panels {
+          display: grid;
+          gap: 10px;
+      }
+
+      .panel {
+          display: none;
+      }
+
+      .tg-err:checked ~ .panels .panel-err {
+          display: grid;
+      }
+
+      .tg-info:checked ~ .panels .panel-info {
+          display: grid;
+          gap: 8px;
+      }
+
+      .tg-stories:checked ~ .panels .panel-stories {
+          display: grid;
+          gap: 8px;
+      }
+
+      .tg-docs:checked ~ .panels .panel-docs {
+          display: grid;
+          gap: 8px;
+      }
+
+      .tg-content:checked ~ .panels .panel-content {
+          display: grid;
+          gap: 8px;
+      }
+
+      .tg-props:checked ~ .panels .panel-props {
+          display: grid;
+      }
+
+      /* Colored notes for prop type error + info */
+      .note {
+          padding: 12px;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+      }
+
+      .note.err {
+          border-color: color-mix(in srgb, var(--err) 55%, var(--border));
+          background: var(--err-bg);
+          color: #ffd1d4;
+      }
+
+      .note.info {
+          border-color: color-mix(in srgb, var(--info) 55%, var(--border));
+          background: var(--info-bg);
+          color: #d6e8ff;
+      }
+
+      .note.ok {
+          border-color: color-mix(in srgb, var(--ok) 55%, var(--border));
+          background: var(--ok-bg);
+          color: var(--fg);
+      }
+
+      .note-title {
+          font-weight: 600;
+          margin-bottom: 6px;
+      }
+
+      .note-body {
+          white-space: normal;
+      }
+
+      /* Story error cards */
+      .ex {
+          padding: 10px;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          background: #0f131b;
+      }
+
+      .ex.err {
+          border-color: color-mix(in srgb, var(--err) 55%, var(--border));
+      }
+
+      .row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+      }
+
+      .status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          display: inline-block;
+      }
+
+      .dot-ok {
+          background: var(--ok);
+      }
+
+      .dot-err {
+          background: var(--err);
+      }
+
+      .ex-name {
+          font-weight: 600;
+      }
+
+      /* Error groups (visible in errors filter) */
+      .error-groups {
+          display: none;
+          margin-bottom: 16px;
+      }
+
+      .group {
+          border: 1px solid var(--border);
+          background: var(--panel);
+          border-radius: 14px;
+          overflow: hidden;
+      }
+
+      .group + .group {
+          margin-top: 12px;
+      }
+
+      .group-header {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 14px;
+          cursor: pointer;
+          border-bottom: 1px solid var(--border);
+      }
+
+      .group-header:hover {
+          background: #141722;
+      }
+
+      .group-title {
+          font-weight: 600;
+          flex: 1;
+      }
+
+      .group-count {
+          font-size: 12px;
+          color: var(--muted);
+      }
+
+      .group-cards {
+          display: none;
+          padding: 12px;
+      }
+
+      .group .card {
+          margin: 12px 0;
+      }
+
+      .group .card:first-child {
+          margin-top: 0;
+      }
+
+      .group .card:last-child {
+          margin-bottom: 0;
+      }
+
+      /* caret rotation */
+      .group-tg:checked + label .caret {
+          transform: rotate(90deg);
+      }
+
+      .caret {
+          transition: transform 0.15s ease;
+      }
+
+      /* toggle body */
+      .group-tg:checked ~ .group-cards {
+          display: block;
+      }
+
+      /* CSS-only filtering of cards via top pills */
+      #filter-errors:target ~ main .card:not(.has-error):not(.has-story-error) {
+          display: none;
+      }
+
+      #filter-infos:target ~ main .card:not(.has-info) {
+          display: none;
+      }
+
+      #filter-story-errors:target ~ main .card:not(.has-story-error) {
+          display: none;
+      }
+
+      #filter-doc-errors:target ~ main .card:not(.has-doc-error) {
+          display: none;
+      }
+
+      #filter-docs:target ~ main .card:has(> .tg-docs),
+      #filter-docs:target ~ main .card.is-doc {
+          display: block;
+      }
+
+      #filter-docs:target ~ main .card:not(:has(> .tg-docs)):not(.is-doc) {
+          display: none;
+      }
+
+      #filter-all:target ~ main .card {
+          display: block;
+      }
+
+      /* In errors view, hide standalone component-error cards in the regular grid (they will appear in groups) */
+      #filter-errors:target ~ main .grid .card.has-error {
+          display: none;
+      }
+
+      /* Show grouped section only in errors view */
+      #filter-errors:target ~ main .error-groups {
+          display: block;
+      }
+
+      /* Section titles */
+      .section-title {
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--muted);
+          margin: 24px 0 12px;
+          padding-bottom: 8px;
+          border-bottom: 1px solid var(--border);
+      }
+      .section-title:first-child {
+          margin-top: 0;
+      }
+
+      /* When a toggle is checked, show the corresponding panel */
+      .card > .tg-err:checked ~ .panels .panel-err {
+          display: grid;
+      }
+      
+      .card > .tg-info:checked ~ .panels .panel-info {
+          display: grid;
+      }
+      
+      .card > .tg-stories:checked ~ .panels .panel-stories {
+          display: grid;
+      }
+
+      .card > .tg-docs:checked ~ .panels .panel-docs {
+          display: grid;
+      }
+
+      .card > .tg-content:checked ~ .panels .panel-content {
+          display: grid;
+      }
+
+      /* Add vertical spacing around panels only when any panel is visible */
+      .card > .tg-err:checked ~ .panels,
+      .card > .tg-info:checked ~ .panels,
+      .card > .tg-stories:checked ~ .panels,
+      .card > .tg-docs:checked ~ .panels,
+      .card > .tg-content:checked ~ .panels,
+      .card > .tg-props:checked ~ .panels {
+          margin: 10px 0;
+      }
+
+      /* Optional: a subtle 1px ring on the active badge, using :has() if available */
+      @supports selector(.card:has(.tg-err:checked)) {
+          .card:has(.tg-err:checked) label[for$='-err'],
+          .card:has(.tg-info:checked) label[for$='-info'],
+          .card:has(.tg-stories:checked) label[for$='-stories'],
+          .card:has(.tg-docs:checked) label[for$='-docs'],
+          .card:has(.tg-content:checked) label[for$='-content'],
+          .card:has(.tg-props:checked) label[for$='-props'] {
+              box-shadow: 0 0 0 1px currentColor;
+              border-color: currentColor;
+          }
+      }
+
+      /* Wrap long lines in code blocks at ~120 characters */
+      pre, code {
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      }
+      pre {
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+          overflow-x: auto; /* fallback for extremely long tokens */
+          margin: 8px 0 0;
+      }
+      pre > code {
+          display: block;
+          white-space: inherit;
+          overflow-wrap: inherit;
+          word-break: inherit;
+          inline-size: min(100%, 120ch);
+      }
+
+      /* MDX content container for docs */
+      .mdx-content {
+          background: #0f131b;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          padding: 12px;
+          max-height: 400px;
+          overflow-y: auto;
+          margin-top: 8px;
+      }
+  </style>
+</head>
+<body>
+<!-- Hidden targets for the top-level filters -->
+<span id="filter-all"></span>
+<span id="filter-errors"></span>
+<span id="filter-infos"></span>
+<span id="filter-story-errors"></span>
+<span id="filter-doc-errors"></span>
+<span id="filter-docs"></span>
+<header>
+  <div class="wrap">
+    <h1>Manifest Debugger</h1>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">10/10 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">10/10 infos</a><span class="filter-pill ok" aria-disabled="true">23 stories ok</span><a class="filter-pill ok" data-k="docs" href="#filter-docs">11 docs ok</a></div>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <div class="note ok" style="margin-bottom: 16px;">
+              Using <code>false</code>. Generation took <strong>0.1s</strong>.
+            </div>
+    <h2 class="section-title">Components</h2>
+    <div class="grid" role="list">
+      
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Action">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Action</h2>
+      <div class="badges">
+        <label for="c-0-reference-assets-action-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-0-reference-assets-action-info" class="badge info as-toggle">1 info</label>
+        <label for="c-0-reference-assets-action-stories" class="badge ok as-toggle">4 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Action.stories.tsx">reference-assets-action · ./src/reference-assets/Action.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-0-reference-assets-action-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-0-reference-assets-action-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-0-reference-assets-action-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/reference-assets-plugin-react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Action } from "@player-ui/reference-assets-plugin-react";
+import { PlayerStory } from "@player-ui/storybook";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/action/action-basic.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Expression</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Expression = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/action/action-counter.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Navigation</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Navigation = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/action/action-navigation.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Transition To End</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const TransitionToEnd = () =&gt; (
+  &lt;PlayerStory
+    flow={() =&gt; import(&quot;@player-ui/mocks/action/action-transition-to-end.json&quot;)}
+  /&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="ChatMessage">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> ChatMessage</h2>
+      <div class="badges">
+        <label for="c-1-reference-assets-chatmessage-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-1-reference-assets-chatmessage-info" class="badge info as-toggle">2 infos</label>
+        <label for="c-1-reference-assets-chatmessage-stories" class="badge ok as-toggle">1 story</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/ChatMessage.stories.tsx">reference-assets-chatmessage · ./src/reference-assets/ChatMessage.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-1-reference-assets-chatmessage-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-1-reference-assets-chatmessage-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-1-reference-assets-chatmessage-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
+  2 | import { Meta } from &quot;@storybook/react-webpack5&quot;;
+  3 |
+&gt; 4 | const meta: Meta = {
+    | ^
+  5 |   title: &quot;Reference Assets/ChatMessage&quot;,
+  6 | };
+  7 |
+
+./src/reference-assets/ChatMessage.stories.tsx:
+import { createDSLStory } from &quot;@player-ui/storybook&quot;;
+import { Meta } from &quot;@storybook/react-webpack5&quot;;
+
+const meta: Meta = {
+  title: &quot;Reference Assets/ChatMessage&quot;,
+};
+
+export default meta;
+
+export const Basic = createDSLStory(
+  () =&gt;
+    import(
+      &quot;!!raw-loader!@player-ui/mocks/chat-message/chat-message-basic.tsx&quot;
+    ),
+);
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">Specify an @import jsdoc tag on your component or your stories meta such as @import import { ChatMessage } from &#39;my-design-system&#39;;</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt;
+  import(
+    &quot;!!raw-loader!@player-ui/mocks/chat-message/chat-message-basic.tsx&quot;
+  );</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Choice">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Choice</h2>
+      <div class="badges">
+        <label for="c-2-reference-assets-choice-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-2-reference-assets-choice-info" class="badge info as-toggle">1 info</label>
+        <label for="c-2-reference-assets-choice-stories" class="badge ok as-toggle">2 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Choice.stories.tsx">reference-assets-choice · ./src/reference-assets/Choice.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-2-reference-assets-choice-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-2-reference-assets-choice-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-2-reference-assets-choice-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/reference-assets-plugin-react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Choice } from "@player-ui/reference-assets-plugin-react";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/choice/choice-basic.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Validation</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Validation = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/choice/choice-validation.tsx&quot;);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Collection">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Collection</h2>
+      <div class="badges">
+        <label for="c-3-reference-assets-collection-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-3-reference-assets-collection-info" class="badge info as-toggle">1 info</label>
+        <label for="c-3-reference-assets-collection-stories" class="badge ok as-toggle">1 story</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Collection.stories.tsx">reference-assets-collection · ./src/reference-assets/Collection.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-3-reference-assets-collection-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-3-reference-assets-collection-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-3-reference-assets-collection-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/reference-assets-plugin-react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Collection } from "@player-ui/reference-assets-plugin-react";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/collection/collection-basic.tsx&quot;);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Image">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Image</h2>
+      <div class="badges">
+        <label for="c-4-reference-assets-image-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-4-reference-assets-image-info" class="badge info as-toggle">1 info</label>
+        <label for="c-4-reference-assets-image-stories" class="badge ok as-toggle">4 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Image.stories.tsx">reference-assets-image · ./src/reference-assets/Image.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-4-reference-assets-image-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-4-reference-assets-image-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-4-reference-assets-image-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/reference-assets-plugin-react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Image } from "@player-ui/reference-assets-plugin-react";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/image/image-basic.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Caption</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Caption = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/image/image-with-caption.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Accessibility</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Accessibility = () =&gt;
+  import(&quot;!!raw-loader!@player-ui/mocks/image/image-with-accessibility.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Placeholder</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Placeholder = () =&gt;
+  import(&quot;!!raw-loader!@player-ui/mocks/image/image-with-placeholder.tsx&quot;);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Info">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Info</h2>
+      <div class="badges">
+        <label for="c-5-reference-assets-info-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-5-reference-assets-info-info" class="badge info as-toggle">1 info</label>
+        <label for="c-5-reference-assets-info-stories" class="badge ok as-toggle">4 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Info.stories.tsx">reference-assets-info · ./src/reference-assets/Info.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-5-reference-assets-info-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-5-reference-assets-info-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-5-reference-assets-info-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/reference-assets-plugin-react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Info } from "@player-ui/reference-assets-plugin-react";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/info/info-basic.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Dynamic Flow</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const DynamicFlow = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/info/info-dynamic-flow.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Footer</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Footer = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/info/info-footer.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Modal Flow</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ModalFlow = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/info/info-modal-flow.tsx&quot;);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Input">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Input</h2>
+      <div class="badges">
+        <label for="c-6-reference-assets-input-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-6-reference-assets-input-info" class="badge info as-toggle">1 info</label>
+        <label for="c-6-reference-assets-input-stories" class="badge ok as-toggle">2 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Input.stories.tsx">reference-assets-input · ./src/reference-assets/Input.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-6-reference-assets-input-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-6-reference-assets-input-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-6-reference-assets-input-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/reference-assets-plugin-react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Input } from "@player-ui/reference-assets-plugin-react";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/input/input-basic.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Validation</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Validation = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/input/input-transition.tsx&quot;);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="ManagedPlayer">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> ManagedPlayer</h2>
+      <div class="badges">
+        <label for="c-7-react-player-managed-player-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-7-react-player-managed-player-info" class="badge info as-toggle">1 info</label>
+        <label for="c-7-react-player-managed-player-stories" class="badge ok as-toggle">3 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/ManagedPlayer.stories.tsx">react-player-managed-player · ./src/ManagedPlayer.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-7-react-player-managed-player-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-7-react-player-managed-player-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-7-react-player-managed-player-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { ManagedPlayer } from "@player-ui/react";
+import { SuspenseSpinner } from "@player-ui/storybook";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Simple Flow</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const SimpleFlow = () =&gt; (
+  &lt;SuspenseSpinner&gt;
+    &lt;ManagedPlayer
+      plugins={[new ReferenceAssetsPlugin()]}
+      manager={createFlowManager(SIMPLE_FLOWS)}
+    /&gt;
+  &lt;/SuspenseSpinner&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Content Error Handling</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ContentErrorHandling = () =&gt; (
+  &lt;SuspenseSpinner&gt;
+    &lt;ManagedPlayer
+      plugins={[new ReferenceAssetsPlugin()]}
+      manager={createFlowManager(ERROR_CONTENT_FLOW)}
+    /&gt;
+  &lt;/SuspenseSpinner&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Asset Error Handling</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const AssetErrorHandling = () =&gt; (
+  &lt;SuspenseSpinner&gt;
+    &lt;ManagedPlayer
+      plugins={[new ReferenceAssetsPlugin()]}
+      manager={createFlowManager(ERROR_ASSET_FLOW)}
+    /&gt;
+  &lt;/SuspenseSpinner&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="ReactPlayer">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> ReactPlayer</h2>
+      <div class="badges">
+        <label for="c-8-react-player-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-8-react-player-info" class="badge info as-toggle">2 infos</label>
+        <label for="c-8-react-player-stories" class="badge ok as-toggle">1 story</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/Player.stories.tsx">react-player · ./src/Player.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-8-react-player-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-8-react-player-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-8-react-player-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
+  2 | import { Meta } from &quot;@storybook/react-webpack5&quot;;
+  3 |
+&gt; 4 | const meta: Meta = {
+    | ^
+  5 |   title: &quot;React Player&quot;,
+  6 | };
+  7 |
+
+./src/Player.stories.tsx:
+import { createDSLStory } from &quot;@player-ui/storybook&quot;;
+import { Meta } from &quot;@storybook/react-webpack5&quot;;
+
+const meta: Meta = {
+  title: &quot;React Player&quot;,
+};
+
+export default meta;
+
+export const ReactPlayer = createDSLStory(
+  () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/action/action-basic.tsx&quot;),
+);
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">Specify an @import jsdoc tag on your component or your stories meta such as @import import { ReactPlayer } from &#39;my-design-system&#39;;</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">React Player</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ReactPlayer = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/action/action-basic.tsx&quot;);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Text">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Text</h2>
+      <div class="badges">
+        <label for="c-9-reference-assets-text-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-9-reference-assets-text-info" class="badge info as-toggle">1 info</label>
+        <label for="c-9-reference-assets-text-stories" class="badge ok as-toggle">1 story</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Text.stories.tsx">reference-assets-text · ./src/reference-assets/Text.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-9-reference-assets-text-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-9-reference-assets-text-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-9-reference-assets-text-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/reference-assets-plugin-react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Text } from "@player-ui/reference-assets-plugin-react";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/text/text-basic.tsx&quot;);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+    </div>
+    <div class="error-groups" role="region" aria-label="Prop type error groups">
+        <section class="group">
+          <input id="component-file-in-node-modules-toggle" class="group-tg" type="checkbox" hidden />
+          <label for="component-file-in-node-modules-toggle" class="group-header">
+            <span class="caret">▸</span>
+            <span class="group-title">Component file in node_modules</span>
+            <span class="group-count">8</span>
+          </label>
+          <div class="group-cards">
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Action">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Action</h2>
+      <div class="badges">
+        <label for="c-error-0-reference-assets-action-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-0-reference-assets-action-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-0-reference-assets-action-stories" class="badge ok as-toggle">4 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Action.stories.tsx">reference-assets-action · ./src/reference-assets/Action.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-0-reference-assets-action-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-0-reference-assets-action-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-0-reference-assets-action-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/reference-assets-plugin-react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Action } from "@player-ui/reference-assets-plugin-react";
+import { PlayerStory } from "@player-ui/storybook";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/action/action-basic.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Expression</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Expression = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/action/action-counter.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Navigation</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Navigation = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/action/action-navigation.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Transition To End</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const TransitionToEnd = () =&gt; (
+  &lt;PlayerStory
+    flow={() =&gt; import(&quot;@player-ui/mocks/action/action-transition-to-end.json&quot;)}
+  /&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Choice">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Choice</h2>
+      <div class="badges">
+        <label for="c-error-1-reference-assets-choice-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-1-reference-assets-choice-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-1-reference-assets-choice-stories" class="badge ok as-toggle">2 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Choice.stories.tsx">reference-assets-choice · ./src/reference-assets/Choice.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-1-reference-assets-choice-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-1-reference-assets-choice-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-1-reference-assets-choice-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/reference-assets-plugin-react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Choice } from "@player-ui/reference-assets-plugin-react";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/choice/choice-basic.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Validation</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Validation = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/choice/choice-validation.tsx&quot;);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Collection">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Collection</h2>
+      <div class="badges">
+        <label for="c-error-2-reference-assets-collection-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-2-reference-assets-collection-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-2-reference-assets-collection-stories" class="badge ok as-toggle">1 story</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Collection.stories.tsx">reference-assets-collection · ./src/reference-assets/Collection.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-2-reference-assets-collection-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-2-reference-assets-collection-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-2-reference-assets-collection-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/reference-assets-plugin-react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Collection } from "@player-ui/reference-assets-plugin-react";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/collection/collection-basic.tsx&quot;);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Image">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Image</h2>
+      <div class="badges">
+        <label for="c-error-3-reference-assets-image-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-3-reference-assets-image-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-3-reference-assets-image-stories" class="badge ok as-toggle">4 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Image.stories.tsx">reference-assets-image · ./src/reference-assets/Image.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-3-reference-assets-image-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-3-reference-assets-image-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-3-reference-assets-image-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/reference-assets-plugin-react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Image } from "@player-ui/reference-assets-plugin-react";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/image/image-basic.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Caption</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Caption = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/image/image-with-caption.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Accessibility</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Accessibility = () =&gt;
+  import(&quot;!!raw-loader!@player-ui/mocks/image/image-with-accessibility.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Placeholder</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Placeholder = () =&gt;
+  import(&quot;!!raw-loader!@player-ui/mocks/image/image-with-placeholder.tsx&quot;);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Info">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Info</h2>
+      <div class="badges">
+        <label for="c-error-4-reference-assets-info-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-4-reference-assets-info-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-4-reference-assets-info-stories" class="badge ok as-toggle">4 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Info.stories.tsx">reference-assets-info · ./src/reference-assets/Info.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-4-reference-assets-info-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-4-reference-assets-info-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-4-reference-assets-info-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/reference-assets-plugin-react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Info } from "@player-ui/reference-assets-plugin-react";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/info/info-basic.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Dynamic Flow</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const DynamicFlow = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/info/info-dynamic-flow.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Footer</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Footer = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/info/info-footer.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Modal Flow</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ModalFlow = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/info/info-modal-flow.tsx&quot;);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Input">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Input</h2>
+      <div class="badges">
+        <label for="c-error-5-reference-assets-input-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-5-reference-assets-input-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-5-reference-assets-input-stories" class="badge ok as-toggle">2 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Input.stories.tsx">reference-assets-input · ./src/reference-assets/Input.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-5-reference-assets-input-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-5-reference-assets-input-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-5-reference-assets-input-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/reference-assets-plugin-react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Input } from "@player-ui/reference-assets-plugin-react";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/input/input-basic.tsx&quot;);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Validation</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Validation = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/input/input-transition.tsx&quot;);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="ManagedPlayer">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> ManagedPlayer</h2>
+      <div class="badges">
+        <label for="c-error-6-react-player-managed-player-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-6-react-player-managed-player-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-6-react-player-managed-player-stories" class="badge ok as-toggle">3 stories</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/ManagedPlayer.stories.tsx">react-player-managed-player · ./src/ManagedPlayer.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-6-react-player-managed-player-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-6-react-player-managed-player-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-6-react-player-managed-player-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { ManagedPlayer } from "@player-ui/react";
+import { SuspenseSpinner } from "@player-ui/storybook";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Simple Flow</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const SimpleFlow = () =&gt; (
+  &lt;SuspenseSpinner&gt;
+    &lt;ManagedPlayer
+      plugins={[new ReferenceAssetsPlugin()]}
+      manager={createFlowManager(SIMPLE_FLOWS)}
+    /&gt;
+  &lt;/SuspenseSpinner&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Content Error Handling</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ContentErrorHandling = () =&gt; (
+  &lt;SuspenseSpinner&gt;
+    &lt;ManagedPlayer
+      plugins={[new ReferenceAssetsPlugin()]}
+      manager={createFlowManager(ERROR_CONTENT_FLOW)}
+    /&gt;
+  &lt;/SuspenseSpinner&gt;
+);</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Asset Error Handling</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const AssetErrorHandling = () =&gt; (
+  &lt;SuspenseSpinner&gt;
+    &lt;ManagedPlayer
+      plugins={[new ReferenceAssetsPlugin()]}
+      manager={createFlowManager(ERROR_ASSET_FLOW)}
+    /&gt;
+  &lt;/SuspenseSpinner&gt;
+);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="Text">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> Text</h2>
+      <div class="badges">
+        <label for="c-error-7-reference-assets-text-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-7-reference-assets-text-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-7-reference-assets-text-stories" class="badge ok as-toggle">1 story</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Text.stories.tsx">reference-assets-text · ./src/reference-assets/Text.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-7-reference-assets-text-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-7-reference-assets-text-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-7-reference-assets-text-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>File: /home/circleci/.cache/bazel/_bazel_circleci/e8362d362e14c7d23506d1dfa3aea8b8/sandbox/processwrapper-sandbox/4022/execroot/_main/bazel-out/k8-fastbuild/bin/docs/storybook/node_modules/@player-ui/reference-assets-plugin-react/dist/index.legacy-esm.js
+Error:
+Component files in node_modules are not supported.
+The distributed files in node_modules usually don&#39;t contain the necessary comments or types needed to analyze component information.
+Configure TypeScript path aliases to map your package name to the source file instead.
+
+Example (tsconfig.json):
+{
+  &quot;compilerOptions&quot;: {
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@design-system/button&quot;: [&quot;src/components/Button.tsx&quot;],
+      &quot;@design-system/*&quot;: [&quot;src/components/*&quot;]
+    }
+  }
+}
+
+Then import using:
+import { Button } from &#39;@design-system/button&#39;
+
+Storybook resolves tsconfig paths automatically.
+Code:
+/* File in node_modules */</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { Text } from "@player-ui/reference-assets-plugin-react";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/text/text-basic.tsx&quot;);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article></div>
+        </section>
+      
+        <section class="group">
+          <input id="no-component-found-toggle" class="group-tg" type="checkbox" hidden />
+          <label for="no-component-found-toggle" class="group-header">
+            <span class="caret">▸</span>
+            <span class="group-title">No component found</span>
+            <span class="group-count">2</span>
+          </label>
+          <div class="group-cards">
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="ChatMessage">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> ChatMessage</h2>
+      <div class="badges">
+        <label for="c-error-0-reference-assets-chatmessage-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-0-reference-assets-chatmessage-info" class="badge info as-toggle">2 infos</label>
+        <label for="c-error-0-reference-assets-chatmessage-stories" class="badge ok as-toggle">1 story</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/ChatMessage.stories.tsx">reference-assets-chatmessage · ./src/reference-assets/ChatMessage.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-0-reference-assets-chatmessage-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-0-reference-assets-chatmessage-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-0-reference-assets-chatmessage-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
+  2 | import { Meta } from &quot;@storybook/react-webpack5&quot;;
+  3 |
+&gt; 4 | const meta: Meta = {
+    | ^
+  5 |   title: &quot;Reference Assets/ChatMessage&quot;,
+  6 | };
+  7 |
+
+./src/reference-assets/ChatMessage.stories.tsx:
+import { createDSLStory } from &quot;@player-ui/storybook&quot;;
+import { Meta } from &quot;@storybook/react-webpack5&quot;;
+
+const meta: Meta = {
+  title: &quot;Reference Assets/ChatMessage&quot;,
+};
+
+export default meta;
+
+export const Basic = createDSLStory(
+  () =&gt;
+    import(
+      &quot;!!raw-loader!@player-ui/mocks/chat-message/chat-message-basic.tsx&quot;
+    ),
+);
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">Specify an @import jsdoc tag on your component or your stories meta such as @import import { ChatMessage } from &#39;my-design-system&#39;;</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Basic</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Basic = () =&gt;
+  import(
+    &quot;!!raw-loader!@player-ui/mocks/chat-message/chat-message-basic.tsx&quot;
+  );</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
+  no-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="ReactPlayer">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> ReactPlayer</h2>
+      <div class="badges">
+        <label for="c-error-1-react-player-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-1-react-player-info" class="badge info as-toggle">2 infos</label>
+        <label for="c-error-1-react-player-stories" class="badge ok as-toggle">1 story</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/Player.stories.tsx">react-player · ./src/Player.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-1-react-player-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-1-react-player-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-1-react-player-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>We could not detect the component from your story file. Specify meta.component.
+  2 | import { Meta } from &quot;@storybook/react-webpack5&quot;;
+  3 |
+&gt; 4 | const meta: Meta = {
+    | ^
+  5 |   title: &quot;React Player&quot;,
+  6 | };
+  7 |
+
+./src/Player.stories.tsx:
+import { createDSLStory } from &quot;@player-ui/storybook&quot;;
+import { Meta } from &quot;@storybook/react-webpack5&quot;;
+
+const meta: Meta = {
+  title: &quot;React Player&quot;,
+};
+
+export default meta;
+
+export const ReactPlayer = createDSLStory(
+  () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/action/action-basic.tsx&quot;),
+);
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">Specify an @import jsdoc tag on your component or your stories meta such as @import import { ReactPlayer } from &#39;my-design-system&#39;;</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+          
+          
+          
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">React Player</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ReactPlayer = () =&gt; import(&quot;!!raw-loader!@player-ui/mocks/action/action-basic.tsx&quot;);</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article></div>
+        </section>
+      </div>
+    <h2 class="section-title">Unattached Docs</h2>
+    <div class="grid" role="list">
+      
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Welcome</h2>
+      <div class="badges">
+        
+        <label for="doc-0-welcome-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/Welcome.mdx">welcome--docs · ./src/Welcome.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-0-welcome-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta } from &quot;@storybook/addon-docs/blocks&quot;;
+
+&lt;Meta title=&quot;Welcome&quot; /&gt;
+
+![Player Logo](https://raw.githubusercontent.com/player-ui/player/refs/tags/0.14.1/docs/site/src/assets/logo/logo-light-large.png)
+
+Player is a framework for building cross-platform experiences. The main engine is written in Typescript, with platform specific adapters for iOS, Android, and React (web). It&#39;s built from the ground up with plugins in mind to perfectly tailor the experience specifically for your app.
+
+This storybook focuses on some example of using the React Player library, including some of the underlying plugins and references for building out apps using Player.
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> React Player</h2>
+      <div class="badges">
+        
+        <label for="doc-1-react-player-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/ReactPlayer.mdx">react-player--docs · ./src/ReactPlayer.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-1-react-player-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story } from &quot;@storybook/addon-docs/blocks&quot;;
+import * as PlayerStory from &quot;./Player.stories&quot;;
+import * as ManagedPlayer from &quot;./ManagedPlayer.stories&quot;;
+
+&lt;Meta title=&quot;React Player&quot; /&gt;
+
+# React Player
+
+This shows the most basic way of rendering Player in a React app.
+
+Create a React Player using the `useReactPlayer` hook, pass it a flow to render, and use the `ReactPlayer.Component` to render the component in your app:
+
+```tsx
+const App = () =&gt; {
+  const { reactPlayer } = useReactPlayer({
+    plugins: [new ReferenceAssetsPlugin()],
+  });
+
+  React.useEffect(() =&gt; {
+    reactPlayer.start(/** Add content here */);
+  }, []);
+
+  return &lt;reactPlayer.Component /&gt;;
+};
+```
+
+&lt;Story of={PlayerStory.ReactPlayer} /&gt;
+
+# Managed React Player
+
+The Managed Player is a way of orchestrating chained flows through a React Player.
+It will step through each flow in the sequence, and enable users to respond after each one.
+
+Between loading each flow, the `ManagedPlayer` will trigger `React.Suspense` and wait for the next flow to be returned.
+
+&lt;Story of={ManagedPlayer.SimpleFlow} /&gt;
+
+## Error Handling
+
+Within Player there are 2 ways of triggering an error, either sent from the UI (custom assets) or from the core Player library (invalid expressions, etc).
+In either scenario, the `ManagedPlayer` will trigger a `fallbackComponent` that can be used to render an error screen. The `fallbackComponent` gets props for either _restarting_ the current flow, which will retry the last flow that Player ran, or _resetting_ the current series of flows (starting over from the very begining)
+
+### Content Errors
+
+This is an example of a flow that triggers an error with an issue within the content itself -- in this case trying to evaluate an invalid expression.
+
+&lt;Story of={ManagedPlayer.ContentErrorHandling} /&gt;
+
+### Asset Errors
+
+This is an example of a flow that triggers an error from the UI -- in this case trying to render as asset type that has no registered handler.
+
+&lt;Story of={ManagedPlayer.AssetErrorHandling} /&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Reference Assets/Intro</h2>
+      <div class="badges">
+        
+        <label for="doc-2-reference-assets-intro-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Intro.mdx">reference-assets-intro--docs · ./src/reference-assets/Intro.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-2-reference-assets-intro-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta } from &quot;@storybook/addon-docs/blocks&quot;;
+
+&lt;Meta title=&quot;Reference Assets/Intro&quot; /&gt;
+
+# Reference Assets
+
+The assets in this section serve as an example and base for building out a plugin to provide a full fledged asset support for an application.
+
+## Usage
+
+To import and use these assets in your app, simply import the plugin and attach it to Player:
+
+```tsx
+import { useReactPlayer, ReactPlayerPlugin } from &quot;@player-ui/react&quot;;
+import ReferenceAssetsPlugin from &quot;@player-ui/reference-assets-plugin-react&quot;;
+
+const plugins: Array&lt;ReactPlayerPlugin&gt; = [new ReferenceAssetsPlugin()];
+
+export const App = () =&gt; {
+  // Create Player with our plugins
+  const { reactPlayer } = useReactPlayer({ plugins });
+
+  // Start the flow.
+
+  React.useEffect(() =&gt; {
+    reactPlayer.start(/** Insert your player content */);
+  }, []);
+
+  // Render Player
+  return &lt;reactPlayer.Component /&gt;;
+};
+```
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Reference Assets/Action</h2>
+      <div class="badges">
+        
+        <label for="doc-3-reference-assets-action-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Action.mdx">reference-assets-action--docs · ./src/reference-assets/Action.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-3-reference-assets-action-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story } from &quot;@storybook/addon-docs/blocks&quot;;
+import { Action } from &quot;@player-ui/reference-assets-plugin-components&quot;;
+import * as ActionStories from &quot;./Action.stories&quot;;
+
+&lt;Meta title=&quot;Reference Assets/Action&quot; component={Action} /&gt;
+
+# Action Asset
+
+The `action` asset is used when you want a user to perform some _action_. It typically manifests as a `button` or `link` depending on the context, and intention.
+
+Actions can advance Player&#39;s state machine using the `value` prop, and/or evaluate an expression using the `exp` prop.
+
+## Basic Use Case
+
+The example below uses the `exp` property to evaluate an expression when the action is clicked.
+This will increment the count, and update the label
+
+&lt;Story of={ActionStories.Basic} /&gt;
+
+## Expression Evaluation
+
+The example below uses the `exp` property to evaluate an expression when the action is clicked.
+This will increment the count, and update the label
+
+&lt;Story of={ActionStories.Expression} /&gt;
+
+## Navigation Transition
+
+&lt;Story of={ActionStories.Navigation} /&gt;
+
+## Navigation Transition To End
+
+&lt;Story of={ActionStories.TransitionToEnd} /&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Reference Assets/Choice</h2>
+      <div class="badges">
+        
+        <label for="doc-4-reference-assets-choice-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Choice.mdx">reference-assets-choice--docs · ./src/reference-assets/Choice.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-4-reference-assets-choice-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story } from &quot;@storybook/addon-docs/blocks&quot;;
+import { Choice } from &quot;@player-ui/reference-assets-plugin-react&quot;;
+import * as ChoiceStories from &quot;./Choice.stories&quot;;
+
+&lt;Meta title=&quot;Reference Assets/Choice&quot; component={Choice} /&gt;
+
+# Choice Asset
+
+The choice asset is used to display a list of &quot;choices&quot; for the user to select from.
+
+&lt;Story of={ChoiceStories.Basic} /&gt;
+
+## Validation
+
+Choices can include validations, with `errors` preventing users from advancing the flow.
+
+&lt;Story of={ChoiceStories.Validation} /&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Reference Assets/Collection</h2>
+      <div class="badges">
+        
+        <label for="doc-5-reference-assets-collection-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Collection.mdx">reference-assets-collection--docs · ./src/reference-assets/Collection.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-5-reference-assets-collection-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story, Canvas } from &quot;@storybook/addon-docs/blocks&quot;;
+import { Collection } from &quot;@player-ui/reference-assets-plugin-react&quot;;
+import * as CollectionStories from &quot;./Collection.stories&quot;;
+
+&lt;Meta title=&quot;Reference Assets/Collection&quot; component={Collection} /&gt;
+
+# Collection Asset
+
+The collection asset can group similar assets together.
+
+&lt;Story of={CollectionStories.Basic} /&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Reference Assets/Image</h2>
+      <div class="badges">
+        
+        <label for="doc-6-reference-assets-image-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Image.mdx">reference-assets-image--docs · ./src/reference-assets/Image.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-6-reference-assets-image-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story, Canvas } from &quot;@storybook/addon-docs/blocks&quot;;
+import { Image } from &quot;@player-ui/reference-assets-plugin-react&quot;;
+import * as ImageStories from &quot;./Image.stories&quot;;
+
+&lt;Meta title=&quot;Reference Assets/Image&quot; component={Image} /&gt;
+
+# Image Asset
+
+The Image asset allows you to render an image from a reference.
+
+&lt;Story of={ImageStories.Basic} /&gt;
+
+## Image with Caption
+
+You can include a caption which appears underneath the image. This must be a text asset.
+
+&lt;Story of={ImageStories.Caption} /&gt;
+
+## Image with alt text
+
+You can also provide a placeholder string and/or an accessibility string. The alt text for the image will be the accessibility string. If not provided, it will be the placeholder string. If that is also not provided, it will be the caption text.
+
+&lt;Story of={ImageStories.Accessibility} /&gt;
+
+&lt;Story of={ImageStories.Placeholder} /&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Reference Assets/Info</h2>
+      <div class="badges">
+        
+        <label for="doc-7-reference-assets-info-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Info.mdx">reference-assets-info--docs · ./src/reference-assets/Info.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-7-reference-assets-info-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story } from &quot;@storybook/addon-docs/blocks&quot;;
+import { Info } from &quot;@player-ui/reference-assets-plugin-react&quot;;
+import * as InfoStories from &quot;./Info.stories&quot;;
+
+&lt;Meta title=&quot;Reference Assets/Info&quot; component={Info} /&gt;
+
+# Info View
+
+The Info view is an example of a top level asset that encomposes a form that a user might see.
+
+&lt;Story of={InfoStories.Basic} /&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Reference Assets/Input</h2>
+      <div class="badges">
+        
+        <label for="doc-8-reference-assets-input-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Input.mdx">reference-assets-input--docs · ./src/reference-assets/Input.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-8-reference-assets-input-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story } from &quot;@storybook/addon-docs/blocks&quot;;
+import { Input } from &quot;@player-ui/reference-assets-plugin-react&quot;;
+import * as InputStories from &quot;./Input.stories&quot;;
+
+&lt;Meta title=&quot;Reference Assets/Input&quot; component={Input} /&gt;
+
+# Input Asset
+
+The text asset is the core means of rendering text.
+Modifiers can be used to customize the display, including making text a hyperlink.
+
+&lt;Story of={InputStories.Basic} /&gt;
+
+## Validation
+
+User input can include validations, with `errors` preventing users from advancing the flow.
+
+&lt;Story of={InputStories.Validation} /&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Reference Assets/Text</h2>
+      <div class="badges">
+        
+        <label for="doc-9-reference-assets-text-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/Text.mdx">reference-assets-text--docs · ./src/reference-assets/Text.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-9-reference-assets-text-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta, Story } from &quot;@storybook/addon-docs/blocks&quot;;
+import { Text } from &quot;@player-ui/reference-assets-plugin-react&quot;;
+import * as TextStories from &quot;./Text.stories&quot;;
+
+&lt;Meta title=&quot;Reference Assets/Text&quot; component={Text} /&gt;
+
+# Text Asset
+
+The text asset is the core means of rendering text.
+Modifiers can be used to customize the display, including making text a hyperlink.
+
+&lt;Story of={TextStories.Basic} /&gt;
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-ok"></span> reference-assets/ChatMessage</h2>
+      <div class="badges">
+        
+        <label for="doc-10-reference-assets-chatmessage-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/reference-assets/ChatMessage.mdx">reference-assets-chatmessage--docs · ./src/reference-assets/ChatMessage.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-10-reference-assets-chatmessage-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import * as ChatMessageStories from &quot;./ChatMessage.stories&quot;;
+
+# ChatMessage Asset
+
+The `ChatMessage` asset is used as an example to demostrate the async streaming feature.
+
+## Basic Use Case
+
+The example below shows the basic usage of async node. Transform the `ChatMessage` asset and render the `text` asset with given value</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+    </div>
+    
+  </div>
+</main>
+</body>
+</html>  
