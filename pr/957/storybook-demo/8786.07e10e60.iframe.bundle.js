@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkstorybook_docs=self.webpackChunkstorybook_docs||[]).push([[8786],{"../../node_modules/.aspect_rules_js/@player-ui+a2ui-plugin-mocks@0.0.0/node_modules/@player-ui/a2ui-plugin-mocks/text/basic.json":module=>{module.exports=JSON.parse('{"surfaceId":"text-basic","components":[{"id":"root","component":"Text","text":"Hello A2UI","variant":"body"}]}')}}]);
